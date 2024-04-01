@@ -2,6 +2,7 @@ import csv
 import os
 import fitz  # PyMuPDF
 import re
+from datetime import datetime
 
 def extract_text_line_by_line(pdf_path):
     pdf_password = os.environ.get('PDF_PASSWORD')
@@ -59,11 +60,24 @@ def extract_fields_from_record(record):
             flattened_record.extend(parts)
     return flattened_record
 
+def convert_date_time(date_str, time_str):
+    # Convert date and time strings to a datetime object for sorting
+    date_format = '%d/%m/%Y'
+    time_format = '%H:%M'
+    return datetime.strptime(date_str, date_format), datetime.strptime(time_str, time_format)
+
 pdf_path = 'class_booking_data.pdf'
 column_titles, records = extract_text_line_by_line(pdf_path)
 
-# Sort records by start date and start time
-records.sort(key=lambda x: (x[0], x[1]))
+# Extract and sort fields
+extracted_fields = []
+for record in records:
+    extracted_field = extract_fields_from_record(record)
+    if len(extracted_field) >= 8:  # Ensure record has enough elements for date and time
+        extracted_fields.append(extracted_field)
+
+# Sort extracted fields by start date and start time
+extracted_fields.sort(key=lambda x: (convert_date_time(x[6], x[7]), convert_date_time(x[0], x[1])))
 
 # Specify column headers for the CSV file
 csv_column_headers = [
@@ -84,10 +98,13 @@ csv_column_headers = [
 with open('records.csv', mode='w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(csv_column_headers)  # Write column headers
-    for record in records:
-        extracted_fields = extract_fields_from_record(record)
-        if len(extracted_fields) < 11:
-            extracted_fields.append('DNA')
-        writer.writerow(extracted_fields)
+    for extracted_field in extracted_fields:
+        if len(extracted_field) < 11:
+            if extracted_field[5] == 'DNA':
+                # print(extracted_field)
+                extracted_field.append(extracted_field[5])
+            else:
+                extracted_field.append(extracted_field[5])
+        writer.writerow(extracted_field)
 
 print("CSV file 'records.csv' has been created successfully.")
