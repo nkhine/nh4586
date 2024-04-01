@@ -30,13 +30,14 @@ def extract_text_line_by_line(pdf_path):
             if page_num == 0:
                 column_titles = lines[:7]
                 print("Column Titles:", column_titles)
+                records.extend(group_lines_into_records(lines[7:]))
             else:
                 records.extend(group_lines_into_records(lines))
 
         # Filter out empty records
         records = [record for record in records if record != ['']]
 
-        # print("Records:", records)
+        print("Records:", len(records))
         return column_titles, records
 
     except Exception as e:
@@ -44,6 +45,7 @@ def extract_text_line_by_line(pdf_path):
 
 def group_lines_into_records(lines):
     records = []
+    print(lines)
     for i in range(0, len(lines), 5):
         record = lines[i:i + 5]
         records.append(record)
