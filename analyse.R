@@ -5,6 +5,11 @@ library(readr)
 # Load the data
 data <- read_csv("formatted.csv")
 
+# Check for parsing issues
+parsing_issues <- problems(data)
+if(nrow(parsing_issues) > 0) {
+  print(parsing_issues)
+}
 # Use 'Reservation_Start_Date__c' as the date,
 # and count the number of occurrences of each 'B25__Reservation_Title__c' for each date.
 data_grouped <- data %>%
