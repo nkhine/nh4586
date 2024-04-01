@@ -22,8 +22,15 @@ attendance_summary <- data %>%
 plot1 <- ggplot(attendance_summary, aes(x = year_month, y = attendance_count, fill = B25__Reservation_Title__c)) +
   geom_bar(stat = "identity", position = "stack") +
   labs(x = "Year-Month", y = "Attendance Count", title = "Class Attendance Over Time",
-       fill = "Class Type") +
-  theme_minimal()
+       fill = "Class Type") +  # Set font color to white
+  theme_minimal() +
+  theme(axis.text.x = element_text(color = "white"),
+        axis.text.y = element_text(color = "white"),
+        legend.text = element_text(color = "white"),
+        plot.title = element_text(color = "white"),
+        axis.title.x = element_text(color = "white"),
+        axis.title.y = element_text(color = "white"))
+
 
 # Save plot1 as an image file
 ggsave("attendance_over_time.png", plot1, width = 10, height = 6, units = "in")
@@ -33,10 +40,17 @@ attendance_percentage <- attendance_summary %>%
   group_by(B25__Reservation_Title__c) %>%
   summarise(attendance_percentage = mean(attendance_count))
 
-plot2 <- ggplot(attendance_percentage, aes(x = B25__Reservation_Title__c, y = attendance_percentage)) +
+plot2 <- ggplot(attendance_percentage, aes(x = B25__Reservation_Title__c, y = attendance_percentage, fill = B25__Reservation_Title__c)) +
   geom_bar(stat = "identity") +
   labs(x = "Class Type", y = "Attendance Percentage", title = "Attendance Percentage by Class Type") +
-  theme_minimal()
+  theme_minimal() +
+  theme(axis.text.x = element_text(color = "white"),
+        axis.text.y = element_text(color = "white"),
+        legend.text = element_text(color = "white"),
+        plot.title = element_text(color = "white"),
+        axis.title.x = element_text(color = "white"),
+        axis.title.y = element_text(color = "white"))
+
 
 # Save plot2 as an image file
 ggsave("attendance_percentage.png", plot2, width = 8, height = 6, units = "in")
