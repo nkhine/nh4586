@@ -1,6 +1,8 @@
 # Load required libraries
 library(tidyverse)
 library(lubridate)
+library(RColorBrewer)
+library(ggplot2)
 
 # Load the CSV file
 data <- read.csv("records.csv")
@@ -34,21 +36,32 @@ attendance_summary <- data %>%
   summarise(attendance_count = sum(Swipe_Status__c %in% c("Attended", "Unmeasured", "Ignore")))
 
 # Plot attendance trends over time
+# plot1 <- ggplot(attendance_summary, aes(x = year_month, y = attendance_count, fill = B25__Reservation_Title__c)) +
+#   geom_bar(stat = "identity", position = "stack") +
+#   labs(x = "Year-Month", y = "Attendance Count", title = paste("Class Attendance Over Time (", date_range, ")"),
+#        fill = "Class Type") +  # Set font color to white
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(color = "white"),
+#         axis.text.y = element_text(color = "white"),
+#         legend.text = element_text(color = "white"),
+#         plot.title = element_text(color = "white"),
+#         axis.title.x = element_text(color = "white"),
+#         axis.title.y = element_text(color = "white")) +
+#   scale_x_date(breaks = blocks, date_labels = "%Y-%m")  # Set breaks and labels for 3-month blocks
+my_colors <- c(rainbow(length(unique(attendance_summary$B25__Reservation_Title__c))))
 plot1 <- ggplot(attendance_summary, aes(x = year_month, y = attendance_count, fill = B25__Reservation_Title__c)) +
   geom_bar(stat = "identity", position = "stack") +
-  labs(x = "Year-Month", y = "Attendance Count", title = paste("Class Attendance Over Time (", date_range, ")"),
-       fill = "Class Type") +  # Set font color to white
-  theme_minimal() +
-  theme(axis.text.x = element_text(color = "white"),
-        axis.text.y = element_text(color = "white"),
-        legend.text = element_text(color = "white"),
-        plot.title = element_text(color = "white"),
-        axis.title.x = element_text(color = "white"),
-        axis.title.y = element_text(color = "white")) +
-  scale_x_date(breaks = blocks, date_labels = "%Y-%m")  # Set breaks and labels for 3-month blocks
-
+  scale_fill_manual(values = my_colors) +
+  labs(x = "Year-Month", y = "Attendance Count", title = "Class Attendance Over Time", fill = "Class Type") +
+  theme_minimal()
 # Save plot1 as an image file
 ggsave("attendance_over_time.png", plot1, width = 10, height = 6, units = "in")
+
+# To prevent automatic regrouping
+attendance_summary <- data %>%
+  filter(Swipe_Status__c %in% c("Attended", "Unmeasured", "Ignore")) %>%
+  group_by(year_month, B25__Reservation_Title__c) %>%
+  summarise(attendance_count = sum(Swipe_Status__c %in% c("Attended", "Unmeasured", "Ignore")), .groups = 'drop')
 
 # Plot attendance percentage by class type
 attendance_percentage <- attendance_summary %>%
